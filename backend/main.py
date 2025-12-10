@@ -1,0 +1,53 @@
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+import time
+
+from .db.database import engine, Base
+from .routers import rooms, websocket
+from .utils.logger import logger
+
+app = FastAPI(title="Collaborative Code Editor Backend")
+
+# CORS middleware for frontend access
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173", # Vite default
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    logger.info(f"Method: {request.method} Path: {request.url.path} Status: {response.status_code} Duration: {process_time:.4f}s")
+    return response
+
+# Startup event to create tables if they don't exist
+# In production, use Alembic migrations instead
+@app.on_event("startup")
+async def startup():
+    logger.info("Starting up application...")
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    logger.info("Database tables created/verified.")
+
+@app.on_event("shutdown")
+async def shutdown():
+    logger.info("Shutting down application...")
+
+app.include_router(rooms.router)
+app.include_router(websocket.router)
+
+@app.get("/")
+def read_root():
+    logger.info("Root endpoint called")
+    return {"message": "Collaborative Editor Backend Running"}

@@ -1,0 +1,22 @@
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from ..services.room_manager import manager
+from ..utils.logger import logger
+
+router = APIRouter()
+
+@router.websocket("/ws/{room_id}")
+async def websocket_endpoint(websocket: WebSocket, room_id: str):
+    logger.info(f"WebSocket connection attempt for room: {room_id}")
+    await manager.connect(room_id, websocket)
+    try:
+        while True:
+            # Wait for any message (code change) from client
+            data = await websocket.receive_text()
+            
+            # Broadcast to others in the room
+            # logger.debug(f"Received update for {room_id}") # Optional: debug level
+            await manager.broadcast(room_id, data, sender=websocket)
+            
+    except WebSocketDisconnect:
+        logger.info(f"WebSocket disconnected for room: {room_id}")
+        manager.disconnect(room_id, websocket)
