@@ -20,6 +20,14 @@ As per the key requirement, the AI autocomplete is a simulated service. It curre
 
 To test this, simply stop typing in the editor for **600ms**, and one of these suggestions will appear.
 
+## Screenshots
+
+![Landing Page](screenshots/landing_page.png)
+*Landing page with Room Creation and Joining*
+
+![Editor View](screenshots/editor_view.png)
+*Real-time Editor with AI Autocomplete*
+
 ## Architecture & Design Choices
 
 ### Backend (FastAPI)
@@ -31,7 +39,7 @@ To test this, simply stop typing in the editor for **600ms**, and one of these s
 - **Routing**: Clean separation of concerns with dedicated routers for `rooms` (REST) and `websocket` (Real-time).
 
 ### Frontend (React + Vite)
-![System Workflow](system_architecture_diagram.png)
+![System Workflow](screenshots/system_architecture_diagram.png)
 *High-level architecture showing User interaction, Frontend-Backend WebSocket sync, and AI Service integration.*
 - **State**: React's local state manages the editor content, while `useEffect` hooks handle WebSocket events (`onmessage`, `onopen`).
 - **Debouncing**: The AI autocomplete API call is debounced by 600ms.
