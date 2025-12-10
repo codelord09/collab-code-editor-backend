@@ -9,30 +9,54 @@ A real-time collaborative code editor built with Python (FastAPI) and React, des
 - **Persistent Metadata**: Room creation events are logged in PostgreSQL.
 - **Premium UI**: Dark-themed, responsive interface with a focus on developer experience.
 
+## AI Capabilities (Mocked)
+
+As per the key requirement, the AI autocomplete is a simulated service. It currently provides the following static suggestions randomly to demonstrate the "trigger-display-apply" workflow:
+
+1. `print('Hello World')`
+2. `def mock_function(): pass`
+3. `import os` + `import sys`
+4. `return True`
+
+To test this, simply stop typing in the editor for **600ms**, and one of these suggestions will appear.
+
 ## Architecture & Design Choices
 
 ### Backend (FastAPI)
 - **Framework**: FastAPI was chosen for its high performance (Asynchronous IO) and native WebSocket support.
 - **Protocol**: WebSockets (`/ws/{roomId}`) handle the real-time bidirectional communication required for the editor.
 - **State Management**: 
-  - **In-Memory**: Active room code state is held in memory (`RoomManager`) for millisecond-latency access. This fits the "prototype" scope where speed is prioritized over complex persistence strategies.
-  - **Database**: PostgreSQL is used to store room metadata (`Room` model), establishing a foundation for future persistence features.
+  - **In-Memory**: Active room code state is held in memory (`RoomManager`) for millisecond-latency access.
+  - **Database**: PostgreSQL is used to store room metadata (`Room` model).
 - **Routing**: Clean separation of concerns with dedicated routers for `rooms` (REST) and `websocket` (Real-time).
 
 ### Frontend (React + Vite)
+![System Workflow](system_architecture_diagram.png)
+*High-level architecture showing User interaction, Frontend-Backend WebSocket sync, and AI Service integration.*
 - **State**: React's local state manages the editor content, while `useEffect` hooks handle WebSocket events (`onmessage`, `onopen`).
 - **Optimization**: 
-  - **Debouncing**: The AI autocomplete API call is debounced by 600ms to prevent API flooding and ensure a smooth user experience.
-  - **CSS**: Custom vanilla CSS variables (dark mode) are used for a lightweight, performant, and consistent design system without the overhead of heavy UI libraries.
+  - **Debouncing**: The AI autocomplete API call is debounced by 600ms.
+  - **CSS**: Custom vanilla CSS variables (dark mode) are used for a lightweight, performant design system.
 
 ## Setup & Running
 
 ### Prerequisites
 - Python 3.9+
 - Node.js (v18+)
-- PostgreSQL (running locally)
+- PostgreSQL (running locally or via Docker)
 
-### 1. Backend Setup
+### 1. Database Setup (PostgreSQL)
+You can install PostgreSQL via Homebrew or run it using Docker.
+
+**Option A: Docker (Recommended)**
+```bash
+docker run --name collab-db -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -e POSTGRES_DB=collab_db -p 5432:5432 -d postgres
+```
+
+**Option B: Local Install**
+Ensure your local Postgres service is running and create a database named `collab_db`.
+
+### 2. Backend Setup
 ```bash
 cd backend
 python3 -m venv venv
@@ -41,14 +65,11 @@ source venv/bin/activate
 # Install dependencies
 pip install fastapi uvicorn websockets sqlalchemy asyncpg pydantic greenlet
 
-# Ensure PostgreSQL is running and update database.py if needed
-# Default: postgresql+asyncpg://user:password@localhost/collab_db
-
 # Run the server
 uvicorn main:app --reload --port 8000
 ```
 
-### 2. Frontend Setup
+### 3. Frontend Setup
 ```bash
 cd frontend
 npm install
@@ -62,21 +83,17 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 While this prototype meets the core requirements, several enhancements would make it production-ready:
 
-### 1. Robust Persistence (Redis)
+### 1. Dockerization (Compose)
+**Current Status**: Manual local setup.
+**Improvement**: We can dockerize the whole application by creating a `docker-compose.yml` file. This `.compose` file would orchestrate the `backend`, `frontend` (served via Nginx), and `postgres` containers together, allowing the entire stack to be spun up with a single `docker-compose up` command.
+
+### 2. Robust Persistence (Redis)
 **Current Limitation**: Code state is stored in Python memory. If the server restarts, code is lost.
-**Improvement**: Use **Redis** to store the active state of each room. This allows the backend to be stateless and scalable across multiple worker processes.
+**Improvement**: Use **Redis** to store the active state of each room. This allows the backend to be stateless and scalable.
 
-### 2. Operational Transformation (OT) or CRDTs
-**Current Limitation**: The "Last-Write-Wins" approach works for simple concurrency but can overwrite changes if two users type exactly simultaneously.
-**Improvement**: Implement **Yjs** or **Automerge** (CRDTs) to handle complex merging of concurrent edits conflict-free.
+### 3. OT/CRDTs for Concurrency
+**Current Limitation**: Last-Write-Wins.
+**Improvement**: Implement **Yjs** or **Automerge** for conflict-free concurrent editing.
 
-### 3. Authentication & Security
-**Current Limitation**: Anyone with a room ID can join.
-**Improvement**: Add JWT-based authentication. Allow room creators to set passwords or "Invite Only" modes.
-
-### 4. Code Execution
-**Enhancement**: Add a backend sandbox (Docker/gVisor) to safely execute the Python code written in the editor and return the output to the client.
-
-### 5. Testing
-**Current Status**: Manual verification.
-**Improvement**: Add `pytest` for backend unit tests (especially WebSocket logic) and `Jest/React Testing Library` for frontend component tests.
+### 4. Authentication
+**Improvement**: Add JWT-based authentication to secure room access.
