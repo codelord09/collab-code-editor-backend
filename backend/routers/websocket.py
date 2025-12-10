@@ -7,7 +7,10 @@ router = APIRouter()
 @router.websocket("/ws/{room_id}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str):
     logger.info(f"WebSocket connection attempt for room: {room_id}")
-    await manager.connect(room_id, websocket)
+    connected = await manager.connect(room_id, websocket)
+    if not connected:
+        logger.warning(f"Connection failed during initialization for room {room_id}")
+        return
     try:
         while True:
             # Wait for any message (code change) from client
