@@ -18,6 +18,8 @@ const Editor = ({ roomId }) => {
         ws.current.onmessage = (event) => {
             // Receive code updates from other users
             setCode(event.data);
+            // Clear suggestion if code changes externally
+            setSuggestion('');
         };
 
         return () => {
@@ -27,9 +29,21 @@ const Editor = ({ roomId }) => {
         };
     }, [roomId]);
 
+    // Auto-trigger autocomplete
+    useEffect(() => {
+        if (!code) return;
+
+        const timer = setTimeout(() => {
+            handleAutocomplete();
+        }, 600); // 600ms debounce as per PRD
+
+        return () => clearTimeout(timer);
+    }, [code]);
+
     const handleChange = (e) => {
         const newCode = e.target.value;
         setCode(newCode);
+        setSuggestion(''); // Clear old suggestion on type
         // Broadcast to room
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
             ws.current.send(newCode);
@@ -47,7 +61,9 @@ const Editor = ({ roomId }) => {
                 }),
             });
             const data = await res.json();
-            setSuggestion(data.suggestion);
+            if (data.suggestion) {
+                setSuggestion(data.suggestion);
+            }
         } catch (err) {
             console.error('Autocomplete failed:', err);
         }
@@ -63,39 +79,41 @@ const Editor = ({ roomId }) => {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3>Room: {roomId}</h3>
-                <button onClick={handleAutocomplete} style={{ padding: '8px 16px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                    Get AI Suggestion
-                </button>
+        <div className="editor-container">
+            <div className="toolbar">
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <span className="room-badge">{roomId}</span>
+                </div>
+
+                <div className="status-text">
+                    <span className="status-dot"></span>
+                    Live Sync • AI Autocomplete On
+                </div>
             </div>
 
-            <div style={{ position: 'relative', flex: 1, minHeight: '400px', border: '1px solid #ccc', borderRadius: '4px' }}>
+            <div className="code-area">
                 <textarea
+                    className="main-editor"
                     value={code}
                     onChange={handleChange}
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        padding: '10px',
-                        fontFamily: 'monospace',
-                        fontSize: '14px',
-                        border: 'none',
-                        resize: 'none',
-                        outline: 'none'
-                    }}
-                    placeholder="Start typing..."
+                    placeholder="Start typing your python code here..."
+                    spellCheck="false"
                 />
             </div>
 
             {suggestion && (
-                <div style={{ background: '#f0f0f0', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}>
-                    <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>Suggestion:</div>
-                    <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{suggestion}</pre>
-                    <div style={{ marginTop: '10px' }}>
-                        <button onClick={applySuggestion} style={{ marginRight: '10px' }}>Apply</button>
-                        <button onClick={() => setSuggestion('')}>Dismiss</button>
+                <div className="suggestion-box">
+                    <div className="suggestion-header">
+                        <div className="suggestion-title">
+                            <span>✨ AI Suggestion</span>
+                        </div>
+                    </div>
+                    <div className="suggestion-content">
+                        <pre className="suggestion-code">{suggestion}</pre>
+                    </div>
+                    <div className="suggestion-actions">
+                        <button onClick={applySuggestion} className="btn btn-primary btn-xs">Apply (Tab)</button>
+                        <button onClick={() => setSuggestion('')} className="btn btn-secondary btn-xs">Dismiss</button>
                     </div>
                 </div>
             )}
