@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from ..services.room_manager import manager
-from ..utils.logger import logger
+from services.room_manager import manager
+from utils.logger import logger
 
 router = APIRouter()
 

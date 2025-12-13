@@ -3,11 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 import uuid
 
-from ..db.database import get_db
-from ..db.models import Room
-from ..schemas.common import RoomCreate, RoomResponse, AutocompleteRequest, AutocompleteResponse
-from ..services.mock_ai import get_mock_suggestion
-from ..utils.logger import logger
+from db.database import get_db
+from db.models import Room
+from schemas.common import RoomCreate, RoomResponse, AutocompleteRequest, AutocompleteResponse
+from services.mock_ai import get_mock_suggestion
+from utils.logger import logger
 
 router = APIRouter()
 

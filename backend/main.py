@@ -2,9 +2,9 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import time
 
-from .db.database import engine, Base
-from .routers import rooms, websocket
-from .utils.logger import logger
+from db.database import engine, Base
+from routers import rooms, websocket
+from utils.logger import logger
 
 app = FastAPI(title="Collaborative Code Editor Backend")
 
@@ -15,6 +15,8 @@ origins = [
     "*"
 ]
 
+# CORS middleware is used to allow web browsers to make requests to this backend
+# from different origins (domains, protocols, or ports) than the backend itself.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -23,6 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Middleware to log all requests and responses
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()

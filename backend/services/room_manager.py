@@ -1,6 +1,6 @@
 from typing import Dict, Set
 from fastapi import WebSocket
-from ..utils.logger import logger
+from utils.logger import logger
 
 class RoomState:
     def __init__(self):

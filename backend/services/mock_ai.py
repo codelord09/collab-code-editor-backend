@@ -1,5 +1,5 @@
 import random
-from ..schemas.common import AutocompleteResponse
+from schemas.common import AutocompleteResponse
 
 async def get_mock_suggestion(context: str) -> AutocompleteResponse:
     # Very simple mock logic: return a dummy snippet

@@ -10,9 +10,15 @@ def setup_logger(name: str = "backend"):
     
     # Check if handlers already exist to avoid duplicate logs during reloads
     if not logger.handlers:
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setFormatter(logging.Formatter(LOG_FORMAT))
-        logger.addHandler(handler)
+        # Stream handler for console
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(logging.Formatter(LOG_FORMAT))
+        logger.addHandler(console_handler)
+
+        # File handler for file logging
+        file_handler = logging.FileHandler("logger.txt")
+        file_handler.setFormatter(logging.Formatter(LOG_FORMAT))
+        logger.addHandler(file_handler)
         
     return logger
 
