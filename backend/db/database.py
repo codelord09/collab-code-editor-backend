@@ -28,5 +28,9 @@ AsyncSessionLocal = sessionmaker(
 Base = declarative_base()
 
 async def get_db():
+    """
+    Dependency generator for database sessions.
+    Yields an async session and ensures it closes after use.
+    """
     async with AsyncSessionLocal() as session:
         yield session

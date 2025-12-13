@@ -13,6 +13,11 @@ router = APIRouter()
 
 @router.post("/rooms", response_model=RoomResponse)
 async def create_room(room: RoomCreate, db: AsyncSession = Depends(get_db)):
+    """
+    Create a new collaboration room.
+    If a custom ID is provided, it attempts to use it; otherwise generates a UUID.
+    Checks if the room ID already exists to prevent duplicates.
+    """
     # Generate ID if not provided
     room_id_str = room.custom_id or str(uuid.uuid4())[:8]
     logger.info(f"Attempting to create room with ID: {room_id_str}")
@@ -33,5 +38,9 @@ async def create_room(room: RoomCreate, db: AsyncSession = Depends(get_db)):
 
 @router.post("/autocomplete", response_model=AutocompleteResponse)
 async def autocomplete(req: AutocompleteRequest):
+    """
+    Provide code completion suggestions based on the given context.
+    Currently delegates to a mock AI service.
+    """
     logger.info(f"Autocomplete requested for context length: {len(req.context)}")
     return await get_mock_suggestion(req.context)

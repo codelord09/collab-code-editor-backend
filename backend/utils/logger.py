@@ -5,6 +5,10 @@ import sys
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 def setup_logger(name: str = "backend"):
+    """
+    Configures and returns a logger instance.
+    Sets up console and file logging if not already configured.
+    """
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
     

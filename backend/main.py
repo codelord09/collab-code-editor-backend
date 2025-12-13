@@ -28,6 +28,10 @@ app.add_middleware(
 # Middleware to log all requests and responses
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    """
+    Middleware to log details of all incoming HTTP requests and their responses.
+    Logs method, path, status code, and processing duration.
+    """
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
@@ -38,6 +42,10 @@ async def log_requests(request: Request, call_next):
 # In production, use Alembic migrations instead
 @app.on_event("startup")
 async def startup():
+    """
+    Event handler that runs on application startup.
+    Initializes the database by creating all tables defined in models.
+    """
     logger.info("Starting up application...")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -45,6 +53,10 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
+    """
+    Event handler that runs on application shutdown.
+    Logs the shutdown event.
+    """
     logger.info("Shutting down application...")
 
 app.include_router(rooms.router)
@@ -52,5 +64,9 @@ app.include_router(websocket.router)
 
 @app.get("/")
 def read_root():
+    """
+    Root endpoint to verify that the backend is running.
+    Returns a welcome message.
+    """
     logger.info("Root endpoint called")
     return {"message": "Collaborative Editor Backend Running"}

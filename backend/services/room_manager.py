@@ -15,6 +15,11 @@ class ConnectionManager:
         self.room_states: Dict[str, RoomState] = {}
 
     async def connect(self, room_id: str, websocket: WebSocket):
+        """
+        Accepts a new WebSocket connection and adds it to the specified room.
+        Initializes room state if it doesn't exist.
+        Sends the current room state (code) to the new client.
+        """
         await websocket.accept()
         if room_id not in self.active_connections:
             logger.info(f"Initializing new room state for room_id: {room_id}")
@@ -35,6 +40,10 @@ class ConnectionManager:
             return False
 
     def disconnect(self, room_id: str, websocket: WebSocket):
+        """
+        Removes a WebSocket connection from a room.
+        Logs the disconnection and the remaining client count.
+        """
         if room_id in self.active_connections:
             self.active_connections[room_id].remove(websocket)
             logger.info(f"Client disconnected from room {room_id}. Remaining clients: {len(self.active_connections[room_id])}")
@@ -45,6 +54,10 @@ class ConnectionManager:
                 pass
 
     async def broadcast(self, room_id: str, message: str, sender: WebSocket):
+        """
+        Broadcasts a message (code update) to all other clients in the room.
+        Updates the server-side room state with the new code.
+        """
         # Update state
         if room_id in self.room_states:
              self.room_states[room_id].code = message

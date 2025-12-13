@@ -6,6 +6,10 @@ router = APIRouter()
 
 @router.websocket("/ws/{room_id}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str):
+    """
+    WebSocket endpoint for real-time collaboration in a specific room.
+    Handles connection, incoming messages, and broadcasting updates.
+    """
     logger.info(f"WebSocket connection attempt for room: {room_id}")
     connected = await manager.connect(room_id, websocket)
     if not connected:
