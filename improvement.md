@@ -1,6 +1,6 @@
 # System Architecture & Technical Roadmap
 
-This document outlines the architectural vision for evolving the Collaborative Code Editor into a production-grade platform comparable to HackerRank, LeetCode, or VS Code Live Share.
+This document outlines the architectural vision for evolving the Collaborative Code Editor into a production-grade platform.
 
 ## 1. Database Schema Design
 The database handles metadata, authentication, and persistence of code state. It allows for complex relationship management between users, rooms, and files.
