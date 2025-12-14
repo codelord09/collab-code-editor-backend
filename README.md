@@ -112,9 +112,5 @@ We have dockerized the whole application by creating a `docker-compose.yml` file
 **Current Limitation**: Code state is stored in Python memory. If the server restarts, code is lost.
 **Improvement**: Use **Redis** to store the active state of each room. This allows the backend to be stateless and scalable.
 
-### 3. OT/CRDTs for Concurrency
-**Current Limitation**: Last-Write-Wins.
-**Improvement**: Implement **Yjs** or **Automerge** for conflict-free concurrent editing.
-
-### 4. Authentication
+### 3. Authentication
 **Improvement**: Add JWT-based authentication to secure room access.
