@@ -45,6 +45,4 @@ erDiagram
     ROOMS ||--|{ FILES : "contains"
 ```
 
-### Technical Rationale
-*   **Normalized Relationship Model**: The use of a junction table (`ROOM_PARTICIPANTS`) decouples Users from Rooms, enabling a flexible Many-to-Many relationship. This supports scenarios where a single user contributes to multiple coding sessions simultaneously.
-*   **Role-Based Access Control (RBAC)**: Storing explicit `roles` within the participation link allows the API layer to enforce granular permissions (e.g., Viewers can subscribe to WebSockets but cannot emit 'edit' events).
+#
